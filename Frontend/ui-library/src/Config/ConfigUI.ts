@@ -126,7 +126,8 @@ export class ConfigUI {
         this.addSettingOption(psSettingsSection, this.optionParametersUi.get(OptionParameters.StreamerId));
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.AutoConnect));
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.AutoPlayVideo));
-        this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.UseMic));
+        this.addSettingFlag(psSettingsSection,  this.flagsUi.get(Flags.UseMic));
+        this.addSettingFlag(psSettingsSection,  this.flagsUi.get(Flags.UseCamera));
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.StartVideoMuted));
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.IsQualityController));
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.ForceMonoAudio));
@@ -134,22 +135,10 @@ export class ConfigUI {
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.SuppressBrowserKeys));
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.AFKDetection));
         this.addSettingFlag(psSettingsSection, this.flagsUi.get(Flags.WaitForStreamer));
-        this.addSettingNumeric(
-            psSettingsSection,
-            this.numericParametersUi.get(NumericParameters.AFKTimeoutSecs)
-        );
-        this.addSettingNumeric(
-            psSettingsSection,
-            this.numericParametersUi.get(NumericParameters.AFKCountdownSecs)
-        );
-        this.addSettingNumeric(
-            psSettingsSection,
-            this.numericParametersUi.get(NumericParameters.MaxReconnectAttempts)
-        );
-        this.addSettingNumeric(
-            psSettingsSection,
-            this.numericParametersUi.get(NumericParameters.StreamerAutoJoinInterval)
-        );
+        this.addSettingNumeric(psSettingsSection, this.numericParametersUi.get(NumericParameters.AFKTimeoutSecs));
+        this.addSettingNumeric(psSettingsSection, this.numericParametersUi.get(NumericParameters.AFKCountdownSecs));
+        this.addSettingNumeric(psSettingsSection, this.numericParametersUi.get(NumericParameters.MaxReconnectAttempts));
+        this.addSettingNumeric(psSettingsSection, this.numericParametersUi.get(NumericParameters.StreamerAutoJoinInterval));
 
         /* Setup all view/ui related settings under this section */
         const viewSettingsSection = this.buildSectionWithHeading(settingsElem, 'UI');
