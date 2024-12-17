@@ -255,7 +255,7 @@ export class PixelStreamingApplicationStyle {
             overflowY: 'auto',
             padding: '1em'
         },
-        '#settingsHeading, #statsHeading': {
+        '#settingsHeading, #statsHeading, #playersHeading': {
             display: 'inline-block',
             fontSize: '2em',
             marginBlockStart: '0.67em',
@@ -265,7 +265,7 @@ export class PixelStreamingApplicationStyle {
             position: 'relative',
             padding: '0 0 0 2rem'
         },
-        '#settingsClose, #statsClose': {
+        '#settingsClose, #statsClose, #playersClose': {
             margin: '0.5rem',
             paddingTop: '0.5rem',
             paddingBottom: '0.5rem',
@@ -273,16 +273,16 @@ export class PixelStreamingApplicationStyle {
             fontSize: '2em',
             float: 'right'
         },
-        '#settingsClose:after, #statsClose:after': {
+        '#settingsClose:after, #statsClose:after, #playersClose:after': {
             paddingLeft: '0.5rem',
             display: 'inline-block',
             content: '"\\00d7"'
         },
-        '#settingsClose:hover, #statsClose:hover': {
+        '#settingsClose:hover, #statsClose:hover, #playersClose:hover': {
             color: 'var(--color3)',
             transition: 'ease 0.3s'
         },
-        '#settingsContent, #statsContent': {
+        '#settingsContent, #statsContent, #playersContent': {
             marginLeft: '2rem',
             marginRight: '2rem'
         },
