@@ -4,6 +4,7 @@ import { FullScreenIcon } from './FullscreenIcon';
 import { SettingsIcon } from './SettingsIcon';
 import { StatsIcon } from './StatsIcon';
 import { XRIcon } from './XRIcon';
+import { PlayersIcon } from './PlayersIcon';
 import { WebXRController } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
 import { UIElementConfig, UIElementCreationMode } from '../UI/UIConfigurationTypes';
 
@@ -18,6 +19,7 @@ export type ControlsUIConfiguration = {
     fullscreenButtonType?: UIElementConfig;
     settingsButtonType?: UIElementConfig;
     xrIconType?: UIElementConfig;
+    playersIconType?: UIElementConfig;
 };
 
 // If there isn't a type provided, default behaviour is to create the element.
@@ -33,6 +35,7 @@ export class Controls {
     fullscreenIcon: FullScreenIcon;
     settingsIcon: SettingsIcon;
     xrIcon: XRIcon;
+    playersIcon: PlayersIcon;
 
     _rootElement: HTMLElement;
 
@@ -51,6 +54,9 @@ export class Controls {
         }
         if (!config || shouldCreateButton(config.xrIconType)) {
             this.xrIcon = new XRIcon();
+        }
+        if (!config || shouldCreateButton(config.playersIconType)) {
+            this.playersIcon = new PlayersIcon();
         }
     }
 
@@ -76,6 +82,9 @@ export class Controls {
                         this._rootElement.appendChild(this.xrIcon.rootElement);
                     }
                 });
+            }
+            if (this.playersIcon) {
+                this._rootElement.appendChild(this.playersIcon.rootElement);
             }
         }
         return this._rootElement;

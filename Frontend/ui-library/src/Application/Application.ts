@@ -25,6 +25,7 @@ import { Controls, ControlsUIConfiguration } from '../UI/Controls';
 import { LabelledButton } from '../UI/LabelledButton';
 import { SettingsPanel } from '../UI/SettingsPanel';
 import { StatsPanel } from '../UI/StatsPanel';
+import { PlayersPanel } from '../UI/PlayersPanel';
 import { VideoQpIndicator } from '../UI/VideoQpIndicator';
 import { ConfigUI } from '../Config/ConfigUI';
 import {
@@ -33,7 +34,8 @@ import {
     UIElementConfig,
     SettingsPanelConfiguration,
     StatsPanelConfiguration,
-    ExtraFlags
+    ExtraFlags,
+    PanelConfiguration
 } from '../UI/UIConfigurationTypes';
 import { FullScreenIconBase, FullScreenIconExternal } from '../UI/FullscreenIcon';
 
@@ -61,6 +63,9 @@ export interface UIOptions {
     /** By default, a stats panel and associate visibility toggle button will be made.
      * If needed, this behaviour can be configured. */
     statsPanelConfig?: StatsPanelConfiguration;
+    /** By default, a players panel and associate visibility toggle button will be made.
+     * If needed, this behaviour can be configured. */
+    playersPanelConfig?: PanelConfiguration;
     /** If needed, the full screen button can be external or disabled. */
     fullScreenControlsConfig?: UIElementConfig;
     /** If needed, XR button can be external or disabled. */
@@ -93,6 +98,7 @@ export class Application {
 
     settingsPanel: SettingsPanel;
     statsPanel: StatsPanel;
+    playersPanel: PlayersPanel;
     videoQpIndicator: VideoQpIndicator;
 
     configUI: ConfigUI;
@@ -124,6 +130,15 @@ export class Application {
             this.settingsPanel = new SettingsPanel();
             this.uiFeaturesElement.appendChild(this.settingsPanel.rootElement);
             this.configureSettings();
+        }
+
+        if (isPanelEnabled(options.playersPanelConfig)) {
+            // Add players panel
+            this.playersPanel = new PlayersPanel();
+            this.playersPanel.onMuteListener = (playerId: string) => {
+                this.stream.emitCommand({ 'Player': { 'Mute': playerId }});
+            };
+            this.uiFeaturesElement.appendChild(this.playersPanel.rootElement);
         }
 
         if (!options.videoQpIndicatorConfig || !options.videoQpIndicatorConfig.disableIndicator) {
@@ -204,6 +219,9 @@ export class Application {
             settingsButtonType: this._options.settingsPanelConfig
                 ? this._options.settingsPanelConfig.visibilityButtonConfig
                 : undefined,
+                playersIconType: this._options.playersPanelConfig
+                ? this._options.playersPanelConfig.visibilityButtonConfig
+                : undefined,
             fullscreenButtonType: this._options.fullScreenControlsConfig,
             xrIconType: this._options.xrControlsConfig
         };
@@ -250,6 +268,16 @@ export class Application {
 
         if (this.statsPanel) {
             this.statsPanel.statsCloseButton.onclick = () => this.statsClicked();
+        }
+
+        // setup the players button
+        const playersButton: HTMLElement | undefined = controls.playersIcon
+            ? controls.playersIcon.rootElement
+            : this._options.playersPanelConfig.visibilityButtonConfig.customElement;
+        if (playersButton) playersButton.onclick = () => this.playersClicked();
+
+        if (this.playersPanel) {
+            this.playersPanel.playersCloseButton.onclick = () => this.playersClicked();
         }
 
         // Add command buttons (if we have somewhere to add them to)
@@ -354,6 +382,8 @@ export class Application {
         this.stream.addEventListener('webRtcTCPRelayDetected', () =>
             Logger.Warning(`Stream quailty degraded due to network enviroment, stream is relayed over TCP.`)
         );
+
+        this.stream.addResponseEventListener('playerList', (response: string) => this.onResponse(response))
     }
 
     /**
@@ -462,6 +492,7 @@ export class Application {
      */
     settingsClicked() {
         this.statsPanel?.hide();
+        this.playersPanel?.hide();
         this.settingsPanel.toggleVisibility();
     }
 
@@ -470,7 +501,17 @@ export class Application {
      */
     statsClicked() {
         this.settingsPanel?.hide();
+        this.playersPanel?.hide();
         this.statsPanel.toggleVisibility();
+    }
+
+    /**
+     * Shows or hides the players panel if clicked
+     */
+    playersClicked() {
+        this.settingsPanel?.hide();
+        this.statsPanel?.hide();
+        this.playersPanel.toggleVisibility();
     }
 
     /**
@@ -640,6 +681,18 @@ export class Application {
 
     onPlayerCount(playerCount: number) {
         this.statsPanel?.handlePlayerCount(playerCount);
+    }
+
+    onResponse(response: string) {
+        const json = JSON.parse(response);
+        if(!json.players)
+        {
+            return;
+        }
+
+        // Overwrite the signalling server play count with the streamer specific number of players.
+        this.statsPanel?.handlePlayerCount(json.players.length);
+        this.playersPanel?.handlePlayerList(json.players);
     }
 
     handleStreamerListMessage(
