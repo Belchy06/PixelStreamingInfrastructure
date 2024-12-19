@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-import { LabelledButton } from "./LabelledButton";
-
+import { LabelledButton } from './LabelledButton';
 
 /**
  * A UI component containing all the players for the application.
@@ -15,7 +14,6 @@ export class PlayersPanel {
     /* A map of players we are storing/rendering */
     _playersMap = new Map<string, LabelledButton>();
     onMuteListener: (playerId: string) => void;
-
 
     constructor() {
         this._rootElement = null;
@@ -50,7 +48,7 @@ export class PlayersPanel {
             this._playersContentElement = document.createElement('div');
             this._playersContentElement.id = 'playersContent';
 
-            this._playersContentElement.appendChild(this.playerList)
+            this._playersContentElement.appendChild(this.playerList);
         }
         return this._playersContentElement;
     }
@@ -63,8 +61,7 @@ export class PlayersPanel {
         return this._playersCloseButton;
     }
 
-    public get playerList(): HTMLElement
-    {
+    public get playerList(): HTMLElement {
         if (!this._playerList) {
             this._playerList = document.createElement('div');
             this._playerList.id = 'playerList';
@@ -99,23 +96,21 @@ export class PlayersPanel {
 
     public handlePlayerList(playerIds: Array<string>): void {
         // Remove players that have disconnected
-        let removedPlayerIds: string[] = [];
+        const removedPlayerIds: string[] = [];
         this._playersMap.forEach((_button: LabelledButton, id: string) => {
-            if(!playerIds.includes(id))
-            {
+            if (!playerIds.includes(id)) {
                 removedPlayerIds.push(id);
             }
         });
 
         removedPlayerIds.forEach((removedPlayerId: string) => {
-            let removedPlayer = this._playersMap.get(removedPlayerId);
+            const removedPlayer = this._playersMap.get(removedPlayerId);
             this.playerList.removeChild(removedPlayer.rootElement);
             this._playersMap.delete(removedPlayerId);
         });
 
         playerIds.forEach((playerId: string) => {
-            if(!this._playersMap.has(playerId))
-            {
+            if (!this._playersMap.has(playerId)) {
                 const controlButton = new LabelledButton(playerId, 'Mute');
                 controlButton.addOnClickListener(() => {
                     controlButton.button.value = controlButton.button.value === 'Mute' ? 'Unmute' : 'Mute';
