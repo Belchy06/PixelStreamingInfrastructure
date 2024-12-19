@@ -64,7 +64,7 @@ export interface config {
 }
 /**
  * *
- * A request for a new streamer to give itself an ID. The flow for these
+ * A request for a new streamer or player to give itself an ID. The flow for these
  * messages should be connect->identify->endpointId->endpointIdConfirm
  *
  * @generated from protobuf message identify
@@ -80,8 +80,8 @@ export interface identify {
 /**
  * *
  * Message is consumed by the Signalling Server. Specifies an id for the
- * streamer. This is used to uniquely identify multiple streamers connected
- * to the same Signalling Server.
+ * streamer/player. This is used to uniquely identify multiple streamers connected
+ * to the same Signalling Server or for players to set a custom id.
  * Note: to preserve backward compatibility when Streamer IDs were optional,
  * when a Streamer first connects it is assigned a temporary ID which
  * allows use of older Streamers if needed.
@@ -100,13 +100,13 @@ export interface endpointId {
      */
     type: string;
     /**
-     * The requested ID of the streamer.
+     * The requested ID of the streamer/player.
      *
      * @generated from protobuf field: string id = 2;
      */
     id: string;
     /**
-     * The signalling protocol version the streamer is using
+     * The signalling protocol version the streamer/player is using
      *
      * @generated from protobuf field: optional string protocolVersion = 3;
      */
@@ -128,7 +128,7 @@ export interface endpointIdConfirm {
      */
     type: string;
     /**
-     * The final ID of the streamer.
+     * The final ID of the streamer/player.
      *
      * @generated from protobuf field: string committedId = 2;
      */
