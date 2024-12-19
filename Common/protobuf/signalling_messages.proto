@@ -31,7 +31,7 @@ message config {
 }
 
 /**
- * A request for a new streamer to give itself an ID. The flow for these
+ * A request for a new streamer or player to give itself an ID. The flow for these
  * messages should be connect->identify->endpointId->endpointIdConfirm
  */
 message identify {
@@ -41,8 +41,8 @@ message identify {
 
 /**
  * Message is consumed by the Signalling Server. Specifies an id for the
- * streamer. This is used to uniquely identify multiple streamers connected
- * to the same Signalling Server.
+ * streamer/player. This is used to uniquely identify multiple streamers connected
+ * to the same Signalling Server or for players to set a custom id.
  * Note: to preserve backward compatibility when Streamer IDs were optional,
  * when a Streamer first connects it is assigned a temporary ID which
  * allows use of older Streamers if needed.
@@ -54,9 +54,9 @@ message identify {
 message endpointId {
   // Should always be 'endpointId'
   string type = 1;
-  // The requested ID of the streamer.
+  // The requested ID of the streamer/player.
   string id = 2;
-  // The signalling protocol version the streamer is using
+  // The signalling protocol version the streamer/player is using
   optional string protocolVersion = 3;
 }
 
@@ -68,7 +68,7 @@ message endpointId {
 message endpointIdConfirm {
   // Should always be 'endpointIdConfirm'
   string type = 1;
-  // The final ID of the streamer.
+  // The final ID of the streamer/player.
   string committedId = 2;
 }
 
