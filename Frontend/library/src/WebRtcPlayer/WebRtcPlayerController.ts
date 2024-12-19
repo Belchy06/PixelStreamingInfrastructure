@@ -181,6 +181,12 @@ export class WebRtcPlayerController {
             const playerCountMessage = msg as Messages.playerCount;
             this.pixelStreaming._onPlayerCount(playerCountMessage.count);
         });
+        this.protocol.addListener(Messages.identify.typeName, (msg: BaseMessage) => {
+            this.handleOnIdentifyMessage(msg as Messages.identify);
+        });
+        this.protocol.addListener(Messages.endpointIdConfirm.typeName, (msg: BaseMessage) => {
+            this.handleOnEndpointIdConfirmMessage(msg as Messages.endpointIdConfirm);
+        });
         this.protocol.addListener(Messages.answer.typeName, (msg: BaseMessage) =>
             this.handleWebRtcAnswer(msg as Messages.answer)
         );
@@ -193,12 +199,6 @@ export class WebRtcPlayerController {
         this.protocol.addListener(Messages.iceCandidate.typeName, (msg: BaseMessage) => {
             const iceCandidateMessage = msg as Messages.iceCandidate;
             this.handleIceCandidate(iceCandidateMessage.candidate);
-        });
-        this.protocol.transport.addListener('open', () => {
-            const message = MessageHelpers.createMessage(Messages.listStreamers);
-            this.protocol.sendMessage(message);
-            this.reconnectAttempt = 0;
-            this.isReconnecting = false;
         });
         this.protocol.transport.addListener('error', () => {
             // dont really need to do anything here since the close event should follow.
@@ -1256,6 +1256,24 @@ export class WebRtcPlayerController {
                 newID
             })
         );
+    }
+
+    handleOnIdentifyMessage(_identifyMessage: Messages.identify)
+    {
+        const playerId = this.config.getTextSettingValue(TextParameters.PlayerId);
+        const message = MessageHelpers.createMessage(Messages.endpointId, { id: playerId });
+        this.protocol.sendMessage(message);
+    }
+
+    handleOnEndpointIdConfirmMessage(endpointIdConfirmMessage: Messages.endpointIdConfirm)
+    {
+        this.config.setTextSetting(TextParameters.PlayerId, endpointIdConfirmMessage.committedId);
+
+        // Now that the ID is confirmed, we can continue the connection flow
+        const message = MessageHelpers.createMessage(Messages.listStreamers);
+        this.protocol.sendMessage(message);
+        this.reconnectAttempt = 0;
+        this.isReconnecting = false;
     }
 
     /**

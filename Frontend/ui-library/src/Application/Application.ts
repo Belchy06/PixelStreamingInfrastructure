@@ -10,6 +10,7 @@ import {
     Messages,
     DataChannelLatencyTestResult,
     OptionParameters,
+    TextParameters,
     SettingsChangedEvent
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
 import { OverlayBase } from '../Overlay/BaseOverlay';
@@ -382,6 +383,8 @@ export class Application {
         this.stream.addEventListener('webRtcTCPRelayDetected', () =>
             Logger.Warning(`Stream quailty degraded due to network enviroment, stream is relayed over TCP.`)
         );
+        this.stream.addEventListener('streamConnect', () => this.onStreamConnect());
+        this.stream.addEventListener('streamDisconnect', () => this.onStreamDisconnect());
 
         this.stream.addResponseEventListener('playerList', (response: string) => this.onResponse(response))
     }
@@ -693,6 +696,14 @@ export class Application {
         // Overwrite the signalling server play count with the streamer specific number of players.
         this.statsPanel?.handlePlayerCount(json.players.length);
         this.playersPanel?.handlePlayerList(json.players);
+    }
+
+    onStreamConnect() {
+        this.configUI.disableSetting(TextParameters.PlayerId);
+    }
+
+    onStreamDisconnect() {
+        this.configUI.enableSetting(TextParameters.PlayerId);
     }
 
     handleStreamerListMessage(
