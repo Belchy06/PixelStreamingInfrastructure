@@ -75,6 +75,7 @@ export const isNumericId = (id: string): id is NumericParametersIds =>
  */
 export class TextParameters {
     static SignallingServerUrl = 'ss' as const;
+    static PlayerId = 'PlayerId' as const;
 }
 
 export type TextParametersKeys = Exclude<keyof typeof TextParameters, 'prototype'>;
@@ -196,6 +197,19 @@ export class Config {
                 settings && Object.prototype.hasOwnProperty.call(settings, OptionParameters.StreamerId)
                     ? [settings[OptionParameters.StreamerId]]
                     : undefined,
+                useUrlParams
+            )
+        );
+
+        this.textParameters.set(
+            TextParameters.PlayerId,
+            new SettingText(
+                TextParameters.PlayerId,
+                'Player ID',
+                'The custom player id to use. May be overwritten by the signalling server to prevent clashes',
+                settings && Object.prototype.hasOwnProperty.call(settings, TextParameters.PlayerId)
+                    ? settings[TextParameters.PlayerId]
+                    : '',
                 useUrlParams
             )
         );
