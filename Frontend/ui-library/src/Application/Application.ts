@@ -39,6 +39,7 @@ import {
     PanelConfiguration
 } from '../UI/UIConfigurationTypes';
 import { FullScreenIconBase, FullScreenIconExternal } from '../UI/FullscreenIcon';
+import { MicrophoneIconBase, MicrophoneIconExternal } from '../UI/MicrophoneIcon';
 
 /**
  * Configuration of the internal video QP indicator element.
@@ -73,6 +74,8 @@ export interface UIOptions {
     xrControlsConfig?: UIElementConfig;
     /** Configuration of the video QP indicator. */
     videoQpIndicatorConfig?: VideoQPIndicatorConfig;
+    /** If needed, microphone button can be external or disabled. */
+    microphoneControlsConfig?: UIElementConfig;
 }
 
 /**
@@ -137,7 +140,7 @@ export class Application {
             // Add players panel
             this.playersPanel = new PlayersPanel();
             this.playersPanel.onMuteListener = (playerId: string) => {
-                this.stream.emitCommand({ 'Player': { 'Mute': playerId }});
+                this.stream.emitCommand({ Player: { Mute: playerId } });
             };
             this.uiFeaturesElement.appendChild(this.playersPanel.rootElement);
         }
@@ -220,11 +223,12 @@ export class Application {
             settingsButtonType: this._options.settingsPanelConfig
                 ? this._options.settingsPanelConfig.visibilityButtonConfig
                 : undefined,
-                playersIconType: this._options.playersPanelConfig
+            playersIconType: this._options.playersPanelConfig
                 ? this._options.playersPanelConfig.visibilityButtonConfig
                 : undefined,
             fullscreenButtonType: this._options.fullScreenControlsConfig,
-            xrIconType: this._options.xrControlsConfig
+            xrIconType: this._options.xrControlsConfig,
+            microphoneIconType: this._options.microphoneControlsConfig
         };
 
         // Setup controls
@@ -260,6 +264,20 @@ export class Application {
               ? this._options.xrControlsConfig.customElement
               : undefined;
         if (xrButton) xrButton.onclick = () => this.stream.toggleXR();
+
+        // Add mic mute button to controls
+        const micMuteButton: MicrophoneIconBase | undefined =
+            // Depending on if we're creating an internal button, or using an external one
+            !!this._options.microphoneControlsConfig &&
+            this._options.microphoneControlsConfig.creationMode === UIElementCreationMode.UseCustomElement
+                ? // Either create a microphone class based on the external button
+                  new MicrophoneIconExternal(this._options.microphoneControlsConfig.customElement)
+                : // Or use the one created by the Controls initializer earlier
+                  controls.microphoneIcon;
+        if (micMuteButton)
+            micMuteButton.onToggled = (muted: boolean) => {
+                muted ? this.stream.muteMicrophone() : this.stream.unmuteMicrophone();
+            };
 
         // setup the stats/info button
         const statsButton: HTMLElement | undefined = controls.statsIcon
@@ -386,7 +404,7 @@ export class Application {
         this.stream.addEventListener('streamConnect', () => this.onStreamConnect());
         this.stream.addEventListener('streamDisconnect', () => this.onStreamDisconnect());
 
-        this.stream.addResponseEventListener('playerList', (response: string) => this.onResponse(response))
+        this.stream.addResponseEventListener('playerList', (response: string) => this.onResponse(response));
     }
 
     /**
@@ -688,8 +706,7 @@ export class Application {
 
     onResponse(response: string) {
         const json = JSON.parse(response);
-        if(!json.players)
-        {
+        if (!json.players) {
             return;
         }
 

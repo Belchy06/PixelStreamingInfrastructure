@@ -7,6 +7,7 @@ import { XRIcon } from './XRIcon';
 import { PlayersIcon } from './PlayersIcon';
 import { WebXRController } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.5';
 import { UIElementConfig, UIElementCreationMode } from '../UI/UIConfigurationTypes';
+import { MicrophoneIcon } from './MicrophoneIcon';
 
 /**
  * Configures how UI elements to control the stream are created.
@@ -20,6 +21,7 @@ export type ControlsUIConfiguration = {
     settingsButtonType?: UIElementConfig;
     xrIconType?: UIElementConfig;
     playersIconType?: UIElementConfig;
+    microphoneIconType?: UIElementConfig;
 };
 
 // If there isn't a type provided, default behaviour is to create the element.
@@ -36,6 +38,7 @@ export class Controls {
     settingsIcon: SettingsIcon;
     xrIcon: XRIcon;
     playersIcon: PlayersIcon;
+    microphoneIcon: MicrophoneIcon;
 
     _rootElement: HTMLElement;
 
@@ -57,6 +60,9 @@ export class Controls {
         }
         if (!config || shouldCreateButton(config.playersIconType)) {
             this.playersIcon = new PlayersIcon();
+        }
+        if (!config || shouldCreateButton(config.microphoneIconType)) {
+            this.microphoneIcon = new MicrophoneIcon();
         }
     }
 
@@ -85,6 +91,9 @@ export class Controls {
             }
             if (this.playersIcon) {
                 this._rootElement.appendChild(this.playersIcon.rootElement);
+            }
+            if (this.microphoneIcon) {
+                this._rootElement.appendChild(this.microphoneIcon.rootElement);
             }
         }
         return this._rootElement;
