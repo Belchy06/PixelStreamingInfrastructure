@@ -1258,15 +1258,13 @@ export class WebRtcPlayerController {
         );
     }
 
-    handleOnIdentifyMessage(_identifyMessage: Messages.identify)
-    {
+    handleOnIdentifyMessage(_identifyMessage: Messages.identify) {
         const playerId = this.config.getTextSettingValue(TextParameters.PlayerId);
         const message = MessageHelpers.createMessage(Messages.endpointId, { id: playerId });
         this.protocol.sendMessage(message);
     }
 
-    handleOnEndpointIdConfirmMessage(endpointIdConfirmMessage: Messages.endpointIdConfirm)
-    {
+    handleOnEndpointIdConfirmMessage(endpointIdConfirmMessage: Messages.endpointIdConfirm) {
         this.config.setTextSetting(TextParameters.PlayerId, endpointIdConfirmMessage.committedId);
 
         // Now that the ID is confirmed, we can continue the connection flow

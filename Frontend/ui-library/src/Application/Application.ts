@@ -403,6 +403,9 @@ export class Application {
         );
         this.stream.addEventListener('streamConnect', () => this.onStreamConnect());
         this.stream.addEventListener('streamDisconnect', () => this.onStreamDisconnect());
+        this.stream.addEventListener('inputControlOwnership', ({ data: { controlsInput } }) =>
+            this.onInputControlOwnership(controlsInput)
+        );
 
         this.stream.addResponseEventListener('playerList', (response: string) => this.onResponse(response));
     }
@@ -710,9 +713,13 @@ export class Application {
             return;
         }
 
-        // Overwrite the signalling server play count with the streamer specific number of players.
-        this.statsPanel?.handlePlayerCount(json.players.length);
+        // Overwrite the signalling server play count with the streamer specific number of players (plus one to include this player).
+        this.statsPanel?.handlePlayerCount(json.players.length + 1);
         this.playersPanel?.handlePlayerList(json.players);
+    }
+
+    onInputControlOwnership(controlsInput: boolean) {
+        this.playersPanel.handleInputController(controlsInput);
     }
 
     onStreamConnect() {

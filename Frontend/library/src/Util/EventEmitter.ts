@@ -533,6 +533,21 @@ export class PlayerCountEvent extends Event {
 }
 
 /**
+ * An event that is emitted when the frontend receives the InputControlOwnership control message
+ */
+export class InputControlOwnershipEvent extends Event {
+    override readonly type: 'inputControlOwnership';
+    readonly data: {
+        /**  */
+        controlsInput: boolean;
+    };
+    constructor(data: InputControlOwnershipEvent['data']) {
+        super('inputControlOwnership');
+        this.data = data;
+    }
+}
+
+/**
  * An event that is emitted when the webRTC connections is relayed over TCP.
  */
 export class WebRtcTCPRelayDetectedEvent extends Event {
@@ -579,6 +594,7 @@ export type PixelStreamingEvent =
     | XrSessionEndedEvent
     | XrFrameEvent
     | PlayerCountEvent
+    | InputControlOwnershipEvent
     | WebRtcTCPRelayDetectedEvent;
 
 export class PixelStreamingEventEmitter extends EventTarget {

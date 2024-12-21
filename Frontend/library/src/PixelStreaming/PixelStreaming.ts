@@ -29,7 +29,8 @@ import {
     DataChannelLatencyTestResponseEvent,
     DataChannelLatencyTestResultEvent,
     PlayerCountEvent,
-    WebRtcTCPRelayDetectedEvent
+    WebRtcTCPRelayDetectedEvent,
+    InputControlOwnershipEvent
 } from '../Util/EventEmitter';
 import { WebXRController } from '../WebXR/WebXRController';
 import { MessageDirection } from '../UeInstanceMessage/StreamMessageController';
@@ -287,6 +288,9 @@ export class PixelStreaming {
      */
     _onInputControlOwnership(inputControlOwnership: boolean): void {
         this._inputController = inputControlOwnership;
+        this._eventEmitter.dispatchEvent(
+            new InputControlOwnershipEvent({ controlsInput: inputControlOwnership })
+        );
     }
 
     /**
