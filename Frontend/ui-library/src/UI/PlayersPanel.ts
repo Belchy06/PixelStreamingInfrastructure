@@ -1,30 +1,41 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 import { Button } from './Button';
+import {
+    isPlayerControlEnabled,
+    PlayerControls,
+    PlayerControlsConfiguration,
+    PlayersPanelConfiguration
+} from './UIConfigurationTypes';
 
 export class PlayerContol {
+    _config: PlayerControlsConfiguration;
     _label: string;
     _rootElement: HTMLElement;
+    // The element responsible for holding all the controls
+    _controlsElement: HTMLElement;
     _muteButton: Button;
     _onMuteListener: () => void;
     _kickButton: Button;
     _onKickListener: () => void;
     _controlsInputButton: Button;
-    _onControlsInputButton: () => void;
+    _onControlsInputListener: () => void;
 
     constructor(
+        config: PlayerControlsConfiguration,
         label: string,
         onMuteListener: () => void,
         onKickListener: () => void,
-        onControlsInputButton: () => void
+        onControlsInputListener: () => void
     ) {
+        this._config = config;
         this._label = label;
         this._onMuteListener = onMuteListener;
         this._onKickListener = onKickListener;
-        this._onControlsInputButton = onControlsInputButton;
+        this._onControlsInputListener = onControlsInputListener;
     }
 
-    public get kickButton(): Button {
+    get kickButton(): Button {
         if (!this._kickButton) {
             this._kickButton = new Button('Kick');
             this._kickButton.addOnClickListener(this._onKickListener);
@@ -32,7 +43,7 @@ export class PlayerContol {
         return this._kickButton;
     }
 
-    public get muteButton(): Button {
+    get muteButton(): Button {
         if (!this._muteButton) {
             this._muteButton = new Button('Mute');
             this._muteButton.addOnClickListener(() => {
@@ -43,12 +54,19 @@ export class PlayerContol {
         return this._muteButton;
     }
 
-    public get controlsInputButton(): Button {
+    get controlsInputButton(): Button {
         if (!this._controlsInputButton) {
             this._controlsInputButton = new Button('Give input control');
-            this._controlsInputButton.addOnClickListener(this._onControlsInputButton);
+            this._controlsInputButton.addOnClickListener(this._onControlsInputListener);
         }
         return this._controlsInputButton;
+    }
+
+    get controlsElement(): HTMLElement {
+        if (!this._controlsElement) {
+            this._controlsElement = document.createElement('div');
+        }
+        return this._controlsElement;
     }
 
     public get rootElement(): HTMLElement {
@@ -62,14 +80,37 @@ export class PlayerContol {
             settingsTextElem.innerText = this._label;
             this._rootElement.appendChild(settingsTextElem);
 
-            const buttonsElement = document.createElement('div');
-            buttonsElement.appendChild(this.kickButton.rootElement);
-            buttonsElement.appendChild(this.muteButton.rootElement);
-            buttonsElement.appendChild(this.controlsInputButton.rootElement);
+            const muteButton = this.muteButton;
+            if (isPlayerControlEnabled(this._config, PlayerControls.Mute)) {
+                this.controlsElement.appendChild(muteButton.rootElement);
+            }
 
-            this._rootElement.appendChild(buttonsElement);
+            const kickButton = this.kickButton;
+            if (isPlayerControlEnabled(this._config, PlayerControls.Kick)) {
+                this.controlsElement.appendChild(kickButton.rootElement);
+            }
+
+            const controlsInputButton = this.controlsInputButton;
+            if (isPlayerControlEnabled(this._config, PlayerControls.SetInputController)) {
+                this.controlsElement.appendChild(controlsInputButton.rootElement);
+            }
+
+            this._rootElement.appendChild(this.controlsElement);
         }
         return this._rootElement;
+    }
+
+    public updateControls(controlsInput: boolean) {
+        if (isPlayerControlEnabled(this._config, PlayerControls.Kick)) {
+            controlsInput
+                ? this.controlsElement.appendChild(this.kickButton.rootElement)
+                : this.controlsElement.removeChild(this.kickButton.rootElement);
+        }
+        if (isPlayerControlEnabled(this._config, PlayerControls.SetInputController)) {
+            controlsInput
+                ? this.controlsElement.appendChild(this.controlsInputButton.rootElement)
+                : this.controlsElement.removeChild(this.controlsInputButton.rootElement);
+        }
     }
 }
 
@@ -82,6 +123,7 @@ export class PlayersPanel {
     _playersContentElement: HTMLElement;
     _playerList: HTMLElement;
     _controlsInput: boolean;
+    _config: PlayersPanelConfiguration;
 
     /* A map of players we are storing/rendering */
     _playersMap = new Map<string, PlayerContol>();
@@ -89,7 +131,8 @@ export class PlayersPanel {
     onKickListener: (playerId: string) => void;
     onControlsInputListener: (playerId: string) => void;
 
-    constructor() {
+    constructor(config: PlayersPanelConfiguration) {
+        this._config = config;
         this._rootElement = null;
         this._controlsInput = true;
     }
@@ -187,29 +230,26 @@ export class PlayersPanel {
         playerIds.forEach((playerId: string) => {
             if (!this._playersMap.has(playerId)) {
                 const playerControl = new PlayerContol(
+                    this._config,
                     playerId,
                     () => this.onMuteListener(playerId),
                     () => this.onKickListener(playerId),
                     () => this.onControlsInputListener(playerId)
                 );
-                playerControl.kickButton.rootElement.style.visibility = this._controlsInput
-                    ? 'visible'
-                    : 'hidden';
-                playerControl.controlsInputButton.rootElement.style.visibility = this._controlsInput
-                    ? 'visible'
-                    : 'hidden';
-
                 this.playerList.appendChild(playerControl.rootElement);
+                playerControl.updateControls(this._controlsInput);
+
                 this._playersMap.set(playerId, playerControl);
             }
         });
     }
 
     public handleInputController(controlsInput: boolean): void {
+        if (this._controlsInput != controlsInput) {
+            this._playersMap.forEach((control: PlayerContol, _id: string) => {
+                control.updateControls(controlsInput);
+            });
+        }
         this._controlsInput = controlsInput;
-        this._playersMap.forEach((control: PlayerContol, _id: string) => {
-            control.kickButton.rootElement.style.visibility = controlsInput ? 'visible' : 'hidden';
-            control.controlsInputButton.rootElement.style.visibility = controlsInput ? 'visible' : 'hidden';
-        });
     }
 }

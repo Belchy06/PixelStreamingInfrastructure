@@ -35,8 +35,8 @@ import {
     UIElementConfig,
     SettingsPanelConfiguration,
     StatsPanelConfiguration,
-    ExtraFlags,
-    PanelConfiguration
+    PlayersPanelConfiguration,
+    ExtraFlags
 } from '../UI/UIConfigurationTypes';
 import { FullScreenIconBase, FullScreenIconExternal } from '../UI/FullscreenIcon';
 import { MicrophoneIconBase, MicrophoneIconExternal } from '../UI/MicrophoneIcon';
@@ -67,7 +67,7 @@ export interface UIOptions {
     statsPanelConfig?: StatsPanelConfiguration;
     /** By default, a players panel and associate visibility toggle button will be made.
      * If needed, this behaviour can be configured. */
-    playersPanelConfig?: PanelConfiguration;
+    playersPanelConfig?: PlayersPanelConfiguration;
     /** If needed, the full screen button can be external or disabled. */
     fullScreenControlsConfig?: UIElementConfig;
     /** If needed, XR button can be external or disabled. */
@@ -138,9 +138,15 @@ export class Application {
 
         if (isPanelEnabled(options.playersPanelConfig)) {
             // Add players panel
-            this.playersPanel = new PlayersPanel();
+            this.playersPanel = new PlayersPanel(options.playersPanelConfig);
             this.playersPanel.onMuteListener = (playerId: string) => {
                 this.stream.emitCommand({ Player: { Mute: playerId } });
+            };
+            this.playersPanel.onKickListener = (playerId: string) => {
+                this.stream.emitCommand({ Player: { Kick: playerId } });
+            };
+            this.playersPanel.onControlsInputListener = (playerId: string) => {
+                this.stream.emitCommand({ Player: { SetInputController: playerId } });
             };
             this.uiFeaturesElement.appendChild(this.playersPanel.rootElement);
         }

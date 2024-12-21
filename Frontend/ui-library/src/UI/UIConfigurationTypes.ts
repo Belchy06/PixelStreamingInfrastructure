@@ -39,6 +39,15 @@ export type StatsSectionsIds = (typeof StatsSections)[StatsSectionsKeys];
 
 export type SectionsIds = SettingsSectionsIds | StatsSectionsIds;
 
+export class PlayerControls {
+    static Mute = 'Mute' as const;
+    static Kick = 'Kick' as const;
+    static SetInputController = 'SetInputController' as const;
+}
+
+export type PlayerControlsKeys = Exclude<keyof typeof PlayerControls, 'prototype'>;
+export type PlayerControlsIds = (typeof PlayerControls)[PlayerControlsKeys];
+
 /** Whether a stream UI element is internally made, externally provided, or disabled. */
 export enum UIElementCreationMode {
     CreateDefaultElement,
@@ -132,6 +141,30 @@ export function isSettingEnabled(
 }
 
 /**
+ * Type for all player controls and a boolean to represent whether this control UI is enabled
+ */
+export type AllPlayerControlsConfig = {
+    [K in PlayerControlsIds]: boolean;
+};
+
+export type PlayerControlsConfiguration = {
+    controlVisibility?: Partial<AllPlayerControlsConfig>;
+};
+
+export function isPlayerControlEnabled(
+    config: PlayerControlsConfiguration | undefined,
+    control: PlayerControlsIds
+): boolean {
+    return (
+        !config ||
+        (!!config &&
+            (!Object.prototype.hasOwnProperty.call(config.controlVisibility, control) ||
+                (Object.prototype.hasOwnProperty.call(config.controlVisibility, control) &&
+                    config.controlVisibility[control])))
+    );
+}
+
+/**
  * Overriden panel configuration to include section visibility for the stats panel
  */
 export type StatsPanelConfiguration = PanelConfiguration & StatsSectionsConfiguration;
@@ -142,3 +175,8 @@ export type StatsPanelConfiguration = PanelConfiguration & StatsSectionsConfigur
 export type SettingsPanelConfiguration = PanelConfiguration &
     SettingsConfiguration &
     SettingsSectionsConfiguration;
+
+/**
+ * Overriden panel configuration to include control visibility for the players panel
+ */
+export type PlayersPanelConfiguration = PanelConfiguration & PlayerControlsConfiguration;
