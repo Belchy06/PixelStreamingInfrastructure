@@ -1,38 +1,66 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 import { Button } from './Button';
+import { Slider } from './Slider';
 import {
     isPlayerControlEnabled,
     PlayerControls,
     PlayerControlsConfiguration,
-    PlayersPanelConfiguration
+    PlayersPanelConfiguration,
+    UIElementCreationMode
 } from './UIConfigurationTypes';
+import { PlayerControlIcon, PlayerControlIconBase, PlayerControlIconExternal } from './PlayerControlIcon';
 
-export class PlayerContol {
+export class PlayerEntry {
     _config: PlayerControlsConfiguration;
     _label: string;
-    _rootElement: HTMLElement;
-    // The element responsible for holding all the controls
-    _controlsElement: HTMLElement;
+    _rootElement: HTMLElement; // The root element for this player entry
+    _playerElement: HTMLElement; // The player element for this entry. Holds the player name and "control" icon (ie the icon to open the controls)
+    _controlsElement: HTMLElement; // The element responsible for holding all the controls
+
     _muteButton: Button;
     _onMuteListener: () => void;
     _kickButton: Button;
     _onKickListener: () => void;
     _controlsInputButton: Button;
     _onControlsInputListener: () => void;
+    _volumeSlider: Slider;
+    _onVolumeSliderListener: (value: number) => void;
+
+    _controlsIcon: PlayerControlIconBase;
 
     constructor(
         config: PlayerControlsConfiguration,
         label: string,
         onMuteListener: () => void,
         onKickListener: () => void,
-        onControlsInputListener: () => void
+        onControlsInputListener: () => void,
+        onVolumeSliderListener: (value: number) => void
     ) {
         this._config = config;
         this._label = label;
         this._onMuteListener = onMuteListener;
         this._onKickListener = onKickListener;
         this._onControlsInputListener = onControlsInputListener;
+        this._onVolumeSliderListener = onVolumeSliderListener;
+
+        this._controlsIcon =
+            // Depending on if we're creating an internal button, or using an external one
+            this._config &&
+            !!this._config.controlButtonConfig &&
+            this._config.controlButtonConfig.creationMode === UIElementCreationMode.UseCustomElement
+                ? // Either create a fullscreen class based on the external button
+                  new PlayerControlIconExternal(this._config.controlButtonConfig.customElement)
+                : // Or use the default icon
+                  new PlayerControlIcon();
+
+        this._controlsIcon.onToggled = () => {
+            if (this.controlsElement.style.display == 'none') {
+                this.controlsElement.style.display = 'block';
+            } else {
+                this.controlsElement.style.display = 'none';
+            }
+        };
     }
 
     get kickButton(): Button {
@@ -62,39 +90,70 @@ export class PlayerContol {
         return this._controlsInputButton;
     }
 
+    get volumeSlider(): Slider {
+        if (!this._volumeSlider) {
+            this._volumeSlider = new Slider('User Volume: 100%');
+            this._volumeSlider.addOnChangeListener((value: number) => {
+                this._volumeSlider.label.innerHTML = `User Volume: ${value}%`;
+            });
+            this._volumeSlider.addOnChangeListener(this._onVolumeSliderListener);
+            this._volumeSlider.slider.min = '0';
+            this._volumeSlider.slider.max = '200';
+            this._volumeSlider.slider.value = '100';
+        }
+        return this._volumeSlider;
+    }
+
     get controlsElement(): HTMLElement {
         if (!this._controlsElement) {
             this._controlsElement = document.createElement('div');
+            this._controlsElement.id = 'playerControls';
+            this._controlsElement.style.display = 'none';
+
+            const volumeSlider = this.volumeSlider;
+            if (isPlayerControlEnabled(this._config, PlayerControls.Volume)) {
+                this._controlsElement.appendChild(volumeSlider.rootElement);
+            }
+
+            const muteButton = this.muteButton;
+            if (isPlayerControlEnabled(this._config, PlayerControls.Mute)) {
+                this._controlsElement.appendChild(muteButton.rootElement);
+            }
+
+            const kickButton = this.kickButton;
+            if (isPlayerControlEnabled(this._config, PlayerControls.Kick)) {
+                this._controlsElement.appendChild(kickButton.rootElement);
+            }
+
+            const controlsInputButton = this.controlsInputButton;
+            if (isPlayerControlEnabled(this._config, PlayerControls.SetInputController)) {
+                this._controlsElement.appendChild(controlsInputButton.rootElement);
+            }
         }
         return this._controlsElement;
+    }
+
+    public get playerElement(): HTMLElement {
+        if (!this._playerElement) {
+            this._playerElement = document.createElement('div');
+            this._playerElement.classList.add('setting');
+
+            // create div element to contain our setting's text
+            const playerTextElem = document.createElement('div');
+            playerTextElem.innerText = this._label;
+            this._playerElement.appendChild(playerTextElem);
+
+            this._playerElement.appendChild(this._controlsIcon.rootElement);
+        }
+        return this._playerElement;
     }
 
     public get rootElement(): HTMLElement {
         if (!this._rootElement) {
             // create root div with "setting" css class
             this._rootElement = document.createElement('div');
-            this._rootElement.classList.add('setting');
-
-            // create div element to contain our setting's text
-            const settingsTextElem = document.createElement('div');
-            settingsTextElem.innerText = this._label;
-            this._rootElement.appendChild(settingsTextElem);
-
-            const muteButton = this.muteButton;
-            if (isPlayerControlEnabled(this._config, PlayerControls.Mute)) {
-                this.controlsElement.appendChild(muteButton.rootElement);
-            }
-
-            const kickButton = this.kickButton;
-            if (isPlayerControlEnabled(this._config, PlayerControls.Kick)) {
-                this.controlsElement.appendChild(kickButton.rootElement);
-            }
-
-            const controlsInputButton = this.controlsInputButton;
-            if (isPlayerControlEnabled(this._config, PlayerControls.SetInputController)) {
-                this.controlsElement.appendChild(controlsInputButton.rootElement);
-            }
-
+            this._rootElement.id = 'playerEntry';
+            this._rootElement.appendChild(this.playerElement);
             this._rootElement.appendChild(this.controlsElement);
         }
         return this._rootElement;
@@ -126,10 +185,11 @@ export class PlayersPanel {
     _config: PlayersPanelConfiguration;
 
     /* A map of players we are storing/rendering */
-    _playersMap = new Map<string, PlayerContol>();
+    _playersMap = new Map<string, PlayerEntry>();
     onMuteListener: (playerId: string) => void;
     onKickListener: (playerId: string) => void;
     onControlsInputListener: (playerId: string) => void;
+    onVolumeSliderListener: (playerId: string, value: number) => void;
 
     constructor(config: PlayersPanelConfiguration) {
         this._config = config;
@@ -215,7 +275,7 @@ export class PlayersPanel {
     public handlePlayerList(playerIds: Array<string>): void {
         // Remove players that have disconnected
         const removedPlayerIds: string[] = [];
-        this._playersMap.forEach((_control: PlayerContol, id: string) => {
+        this._playersMap.forEach((_control: PlayerEntry, id: string) => {
             if (!playerIds.includes(id)) {
                 removedPlayerIds.push(id);
             }
@@ -229,12 +289,13 @@ export class PlayersPanel {
 
         playerIds.forEach((playerId: string) => {
             if (!this._playersMap.has(playerId)) {
-                const playerControl = new PlayerContol(
+                const playerControl = new PlayerEntry(
                     this._config,
                     playerId,
                     () => this.onMuteListener(playerId),
                     () => this.onKickListener(playerId),
-                    () => this.onControlsInputListener(playerId)
+                    () => this.onControlsInputListener(playerId),
+                    (value: number) => this.onVolumeSliderListener(playerId, value)
                 );
                 this.playerList.appendChild(playerControl.rootElement);
                 playerControl.updateControls(this._controlsInput);
@@ -246,7 +307,7 @@ export class PlayersPanel {
 
     public handleInputController(controlsInput: boolean): void {
         if (this._controlsInput != controlsInput) {
-            this._playersMap.forEach((control: PlayerContol, _id: string) => {
+            this._playersMap.forEach((control: PlayerEntry, _id: string) => {
                 control.updateControls(controlsInput);
             });
         }

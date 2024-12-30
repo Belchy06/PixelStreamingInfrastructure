@@ -148,6 +148,11 @@ export class Application {
             this.playersPanel.onControlsInputListener = (playerId: string) => {
                 this.stream.emitCommand({ Player: { SetInputController: playerId } });
             };
+            this.playersPanel.onVolumeSliderListener = (playerId: string, value: number) => {
+                this.stream.emitCommand({
+                    Player: { Volume: { TargetPlayer: playerId, Value: `${value}` } }
+                });
+            };
             this.uiFeaturesElement.appendChild(this.playersPanel.rootElement);
         }
 

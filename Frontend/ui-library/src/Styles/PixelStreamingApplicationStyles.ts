@@ -510,6 +510,25 @@ export class PixelStreamingApplicationStyle {
         },
         '.svgIcon': {
             fill: 'var(--color2)'
+        },
+        '#playerEntry': {
+            display: 'inline-block',
+            width: '100%'
+        },
+        '#playerEntry label': {
+            display: 'block',
+            paddingBottom: '0.25rem'
+        },
+        '#playerControls': {
+            backgroundColor: 'var(--color7)',
+            padding: '0.5rem',
+            borderRadius: '5%'
+        },
+        '#playerControls input': {
+            width: '100%'
+        },
+        '.sliderLabel': {
+            fontSize: '0.75rem'
         }
     };
 

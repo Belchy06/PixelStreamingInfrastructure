@@ -43,6 +43,7 @@ export class PlayerControls {
     static Mute = 'Mute' as const;
     static Kick = 'Kick' as const;
     static SetInputController = 'SetInputController' as const;
+    static Volume = 'Volume' as const;
 }
 
 export type PlayerControlsKeys = Exclude<keyof typeof PlayerControls, 'prototype'>;
@@ -148,6 +149,7 @@ export type AllPlayerControlsConfig = {
 };
 
 export type PlayerControlsConfiguration = {
+    controlButtonConfig: UIElementConfig;
     controlVisibility?: Partial<AllPlayerControlsConfig>;
 };
 
