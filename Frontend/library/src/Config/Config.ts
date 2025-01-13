@@ -820,7 +820,7 @@ export class Config {
         if (this.textParameters.has(id)) {
             return this.textParameters.get(id).value as string;
         } else {
-            throw new Error(`There is no numeric setting with the id of ${id}`);
+            throw new Error(`There is no text setting with the id of ${id}`);
         }
     }
 

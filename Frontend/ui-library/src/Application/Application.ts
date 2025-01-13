@@ -139,19 +139,24 @@ export class Application {
         if (isPanelEnabled(options.playersPanelConfig)) {
             // Add players panel
             this.playersPanel = new PlayersPanel(options.playersPanelConfig);
-            this.playersPanel.onMuteListener = (playerId: string) => {
-                this.stream.emitCommand({ Player: { Mute: playerId } });
+            this.playersPanel.onMuteListener = (playerId: string, mute: boolean, isGlobal: boolean) => {
+                this.stream.emitCommand({
+                    Player: { Mute: { Target: playerId, Status: mute, IsGlobal: isGlobal } }
+                });
+            };
+            this.playersPanel.onDeafenListener = (playerId: string, deafen: boolean, isGlobal: boolean) => {
+                this.stream.emitCommand({
+                    Player: { Deafen: { Target: playerId, Status: deafen, IsGlobal: isGlobal } }
+                });
             };
             this.playersPanel.onKickListener = (playerId: string) => {
-                this.stream.emitCommand({ Player: { Kick: playerId } });
+                this.stream.emitCommand({ Player: { Kick: { Target: playerId } } });
             };
             this.playersPanel.onControlsInputListener = (playerId: string) => {
-                this.stream.emitCommand({ Player: { SetInputController: playerId } });
+                this.stream.emitCommand({ Player: { SetInputController: { Target: playerId } } });
             };
             this.playersPanel.onVolumeSliderListener = (playerId: string, value: number) => {
-                this.stream.emitCommand({
-                    Player: { Volume: { TargetPlayer: playerId, Value: `${value}` } }
-                });
+                this.stream.emitCommand({ Player: { Volume: { Target: playerId, Value: value } } });
             };
             this.uiFeaturesElement.appendChild(this.playersPanel.rootElement);
         }
@@ -418,7 +423,9 @@ export class Application {
             this.onInputControlOwnership(controlsInput)
         );
 
-        this.stream.addResponseEventListener('playerList', (response: string) => this.onResponse(response));
+        this.stream.addResponseEventListener('playerControls', (response: string) =>
+            this.onResponse(response)
+        );
     }
 
     /**
@@ -720,13 +727,24 @@ export class Application {
 
     onResponse(response: string) {
         const json = JSON.parse(response);
-        if (!json.players) {
+        if (!json || !json.Type) {
             return;
         }
 
-        // Overwrite the signalling server play count with the streamer specific number of players (plus one to include this player).
-        this.statsPanel?.handlePlayerCount(json.players.length + 1);
-        this.playersPanel?.handlePlayerList(json.players);
+        if (json.Type === 'PlayerList') {
+            delete json.Type;
+            this.statsPanel?.handlePlayerCount(Object.keys(json).length);
+            this.playersPanel?.handlePlayerList(
+                response,
+                this.stream.config.getTextSettingValue(TextParameters.PlayerId)
+            );
+        } else if (json.Type === 'PlayerMuteState') {
+            this.playersPanel?.handlePlayerMuteState(json.Target, json.State, json.IsGlobal);
+        } else if (json.Type === 'PlayerDeafenState') {
+            this.playersPanel?.handlePlayerDeafenState(json.Target, json.State, json.IsGlobal);
+        } else if (json.Type === 'PlayerActivityState') {
+            this.playersPanel?.handlePlayerActivityState(json.Target, json.State);
+        }
     }
 
     onInputControlOwnership(controlsInput: boolean) {

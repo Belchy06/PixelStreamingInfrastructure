@@ -229,6 +229,12 @@ export class PixelStreamingApplicationStyle {
         '.btn-flat:focus': {
             outline: 'none'
         },
+        '.btn-flat.danger': {
+            borderColor: 'var(--color5) !important'
+        },
+        '.btn-flat.danger:hover': {
+            backgroundColor: 'var(--color5) !important'
+        },
         '#uiFeatures img': {
             width: '100%',
             height: '100%'
@@ -529,6 +535,17 @@ export class PixelStreamingApplicationStyle {
         },
         '.sliderLabel': {
             fontSize: '0.75rem'
+        },
+        '.playerLabel': {
+            display: 'flex'
+        },
+        '.playerLabel svg': {
+            width: '1.1rem',
+            height: '1.1rem',
+            margin: '0rem 0.5rem'
+        },
+        '.playerLabel.isSpeaking': {
+            color: 'var(--color3)'
         }
     };
 

@@ -44,6 +44,9 @@ export class PlayerControls {
     static Kick = 'Kick' as const;
     static SetInputController = 'SetInputController' as const;
     static Volume = 'Volume' as const;
+    static Deafen = 'Deafen' as const;
+    static GlobalMute = 'GlobalMute' as const;
+    static GlobalDeafen = 'GlobalDeafen' as const;
 }
 
 export type PlayerControlsKeys = Exclude<keyof typeof PlayerControls, 'prototype'>;
