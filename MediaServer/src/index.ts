@@ -8,9 +8,9 @@ import { beautify, IProgramOptions } from './Utils';
 import { Command, Option } from 'commander';
 import { PluginRegistry } from './PluginRegistry';
 // Use require so the plugin is constructed in the export and self registered
-require('./Plugins/SFU'); 
-require('./Plugins/SignallingServer'); 
-require('./Plugins/WebServer'); 
+require('./Plugins/SFU');
+require('./Plugins/SignallingServer');
+require('./Plugins/WebServer');
 
 // eslint-disable-next-line  @typescript-eslint/no-unsafe-assignment
 const pjson = require('../package.json');
@@ -142,13 +142,35 @@ if (options.log_config) {
     }
 }
 
-for (const [key, value] of Object.entries(options.plugins)) {
-    const plugin = PluginRegistry.get().find(key);
+function initializePlugin(pluginId: string, config: any) {
+    const plugin = PluginRegistry.get().find('web_server');
     if (!plugin) {
-        Logger.error(`Unable to find plugin ${key}. Is it registered?`);
-        continue;
+        Logger.error(`Unable to find web_server plugin. Is it registered?`);
+        return;
     }
-    plugin.initialize(value);
+    plugin.initialize(config);
+}
+
+// The existing plugins must be loaded in this order regardless of the order they appear in the 
+// config json
+if (options.plugins.web_server) {
+    initializePlugin('web_server', options.plugins.web_server);
+    delete options.plugins.web_server;
+}
+
+if (options.plugins.signalling_server) {
+    initializePlugin('signalling_server', options.plugins.signalling_server);
+    delete options.plugins.signalling_server;
+}
+
+if (options.plugins.SFU) {
+    initializePlugin('SFU', options.plugins.SFU);
+    delete options.plugins.SFU;
+}
+
+// Load remaining plugins
+for (const [key, value] of Object.entries(options.plugins)) {
+    initializePlugin(key, value);
 }
 
 
