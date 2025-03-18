@@ -4,28 +4,28 @@ import * as wslib from 'ws';
 import { StreamerConnection } from './StreamerConnection';
 import { PlayerConnection } from './PlayerConnection';
 import { SFUConnection } from './SFUConnection';
-import { Logger } from './Logger';
+import { Logger } from '../../Logger';
 import { StreamerRegistry } from './StreamerRegistry';
 import { PlayerRegistry } from './PlayerRegistry';
 import { Messages, MessageHelpers, SignallingProtocol } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.5';
-import { stringify } from './Utils';
+import { stringify, beautify } from '../../Utils';
 
+export type PlayerConfig = {
+} & ( 
+    // Only one of these three members needs to be specified
+    | { httpServer: http.Server, httpsServer?: never, playerPort?: never } // An http server to use for player connections rather than a port.
+    | { httpServer?: never, httpsServer: https.Server, playerPort?: never } // An https server to use for player connections rather than a port.
+    | { httpServer?: never, httpsServer?: never, playerPort: number } // The port to listen on for player connections.
+)
 /**
  * An interface describing the possible options to pass when creating
  * a new SignallingServer object.
  */
 export interface IServerConfig {
-    // An http server to use for player connections rather than a port. Not needed if playerPort or httpsServer supplied.
-    httpServer?: http.Server;
-
-    // An https server to use for player connections rather than a port. Not needed if playerPort or httpServer supplied.
-    httpsServer?: https.Server;
-
     // The port to listen on for streamer connections.
     streamerPort: number;
 
-    // The port to listen on for player connections. Not needed if httpServer or httpsServer supplied.
-    playerPort?: number;
+    playerConfig: PlayerConfig;
 
     // The port to listen on for SFU connections. If not supplied SFU connections will be disabled.
     sfuPort?: number;
@@ -68,7 +68,7 @@ export class SignallingServer {
      * @param config - A collection of options for this server.
      */
     constructor(config: IServerConfig) {
-        Logger.debug('Started SignallingServer with config: %s', stringify(config));
+        Logger.debug('Started SignallingServer with config: %s', beautify(config));
 
         this.config = config;
         this.streamerRegistry = new StreamerRegistry();
@@ -78,11 +78,6 @@ export class SignallingServer {
             peerConnectionOptions: this.config.peerOptions || {}
         };
         this.startTime = new Date();
-
-        if (!config.playerPort && !config.httpServer && !config.httpsServer) {
-            Logger.error('No player port, http server or https server supplied to SignallingServer.');
-            return;
-        }
 
         // Streamer connections
         const streamerServer = new wslib.WebSocketServer({
@@ -94,15 +89,15 @@ export class SignallingServer {
         Logger.info(`Listening for streamer connections on port ${config.streamerPort}`);
 
         // Player connections
-        const server = config.httpsServer || config.httpServer;
+        const server = config.playerConfig.httpServer || config.playerConfig.httpsServer;
         const playerServer = new wslib.WebSocketServer({
             server: server,
-            port: server ? undefined : config.playerPort,
+            port: server ? undefined : config.playerConfig.playerPort,
             ...config.playerWsOptions
         });
         playerServer.on('connection', this.onPlayerConnected.bind(this));
-        if (!config.httpServer && !config.httpsServer) {
-            Logger.info(`Listening for player connections on port ${config.playerPort}`);
+        if (!server) {
+            Logger.info(`Listening for player connections on port ${config.playerConfig.playerPort}`);
         }
 
         // Optional SFU connections

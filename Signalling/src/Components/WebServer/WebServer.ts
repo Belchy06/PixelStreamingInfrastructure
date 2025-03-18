@@ -4,7 +4,7 @@ import fs from 'fs';
 import http from 'http';
 import https from 'https';
 import helmet from 'helmet';
-import { Logger } from './Logger';
+import { Logger } from '../../Logger';
 import RateLimit from 'express-rate-limit';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -10,8 +10,8 @@ import {
 } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.5';
 import { IPlayer, IPlayerInfo } from './PlayerRegistry';
 import { IStreamer, IStreamerInfo } from './StreamerRegistry';
-import { Logger } from './Logger';
-import * as LogUtils from './LoggingUtils';
+import { Logger } from '../../Logger';
+import * as LogUtils from '../../LoggingUtils';
 import { SignallingServer } from './SignallingServer';
 
 /**

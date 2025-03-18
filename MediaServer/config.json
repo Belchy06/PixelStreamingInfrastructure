@@ -1,0 +1,91 @@
+{
+	"log_folder": "logs",
+	"log_level_console": "info",
+	"log_level_file": "info",
+	"log_config": true,
+	"console_messages": "verbose",
+	"stdin": false,
+	"plugins": {
+		"web_server": {
+			"enabled": true,
+			"http_port": 80,
+			"http_root": "D:\\PixelStreamingInfrastructure\\SignallingWebServer\\www",
+			"homepage": "player.html",
+			"https": false,
+			"https_port": 443,
+			"ssl_key_path": "certificates/client-key.pem",
+			"ssl_cert_path": "certificates/client-cert.pem",
+			"https_redirect": true
+		},
+		"signalling_server": {
+			"enabled": true,
+			"streamer_port": 8888,
+			"player_port": 80,
+			"sfu_port": 8889,
+			"rest_api": false,
+			"peer_options": "",
+			"max_players": 0
+		},
+		"SFU": {
+			"enabled": true,
+			"sfu_id": "SFU",
+			"subscribe_streamer_id": "DefaultStreamer",
+			"signalling_url": "ws://localhost:8889",
+			"retry_subscribe_delay_secs": 10,
+			"enable_svc": true,
+			"mediasoup": {
+				"worker": {
+					"rtc_min_port": 40000,
+					"rtc_max_port": 49999,
+					"log_level": "debug",
+					"log_tags": [
+						"info",
+						"ice",
+						"dtls",
+						"rtp",
+						"srtp",
+						"rtcp",
+						"sctp"
+					]
+				},
+				"router": {
+					"media_codecs": [
+						{
+							"kind": "audio",
+							"mime_type": "audio/opus",
+							"clock_rate": 48000,
+							"channels": 2
+						},
+						{
+							"kind": "video",
+							"mime_type": "video/VP8",
+							"clock_rate": 90000,
+							"parameters": {}
+						},
+						{
+							"kind": "video",
+							"mime_type": "video/VP9",
+							"clock_rate": 90000,
+							"parameters": {
+								"profile-id": 0
+							}
+						},
+						{
+							"kind": "video",
+							"mime_type": "video/h264",
+							"clock_rate": 90000,
+							"parameters": {
+								"packetization-mode": 1,
+								"profile-level-id": "42e01f",
+								"level-asymmetry-allowed": 1
+							}
+						}
+					]
+				},
+				"webrtc_transport": {
+					"initial_available_outgoing_bitrate": 100000000
+				}
+			}
+		}
+	}
+}

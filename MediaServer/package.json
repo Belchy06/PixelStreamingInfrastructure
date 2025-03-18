@@ -1,0 +1,41 @@
+{
+  "name": "@epicgames-ps/mediaserver",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "tsc",
+    "rebuild": "npm run clean && npm run build",
+    "start": "node ./dist/index.js --console_messages verbose --log_config",
+    "lint": "eslint src",
+    "watch": "nodemon -V -d 3 --watch src --watch ../MediaServer/dist -e \"ts,js,mjs,cjs,json\" --exec \"npm run build && node ./dist/index.js --console_messages verbose --log_config"
+  },
+  "author": "Epic Games",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/express": "^5.0.0",
+    "eslint": "^9.20.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-tsdoc": "^0.4.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.0"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "express": "^4.21.2",
+    "express-openapi": "^12.1.3",
+    "jsonc": "^2.0.0"
+  },
+  "peerDependencies": {
+    "@epicgames-ps/lib-pixelstreamingsignalling-ue5.5": "*"
+  },
+  "overrides": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EpicGames/PixelStreamingInfrastructure.git"
+  }
+}

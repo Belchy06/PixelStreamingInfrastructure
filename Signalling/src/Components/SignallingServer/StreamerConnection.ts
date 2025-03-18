@@ -9,9 +9,9 @@ import {
     MessageHelpers
 } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.5';
 import { IStreamer, IStreamerInfo } from './StreamerRegistry';
-import { stringify } from './Utils';
-import { Logger } from './Logger';
-import * as LogUtils from './LoggingUtils';
+import { stringify } from '../../Utils';
+import { Logger } from '../../Logger';
+import * as LogUtils from '../../LoggingUtils';
 import { SignallingServer } from './SignallingServer';
 
 /**

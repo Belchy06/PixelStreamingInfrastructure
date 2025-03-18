@@ -6,8 +6,8 @@ import {
     BaseMessage,
     EventEmitter
 } from '@epicgames-ps/lib-pixelstreamingcommon-ue5.5';
-import { Logger } from './Logger';
-import { IMessageLogger } from './LoggingUtils';
+import { Logger } from '../../Logger';
+import { IMessageLogger } from '../../LoggingUtils';
 import { IPlayerInfo } from './PlayerRegistry';
 
 /**
