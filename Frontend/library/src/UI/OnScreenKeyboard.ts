@@ -6,11 +6,6 @@ import { UntranslatedCoordUnsigned } from '../Util/InputCoordTranslator';
  * Class for handling on screen keyboard usage
  */
 export class OnScreenKeyboard {
-    // If the user focuses on a UE input widget then we show them a button to open
-    // the on-screen keyboard. JavaScript security means we can only show the
-    // on-screen keyboard in response to a user interaction.
-    editTextButton: HTMLButtonElement;
-
     // A hidden input text box which is used only for focusing and opening the
     // on-screen keyboard.
     hiddenInput: HTMLInputElement;
@@ -20,12 +15,9 @@ export class OnScreenKeyboard {
      * @param videoElementParent The div element the video player is injected into
      */
     constructor(videoElementParent: HTMLElement) {
-        this.editTextButton = null;
         this.hiddenInput = null;
 
-        if ('ontouchstart' in document.documentElement) {
-            this.createOnScreenKeyboardHelpers(videoElementParent);
-        }
+        this.createOnScreenKeyboardHelpers(videoElementParent);
     }
 
     /**
@@ -58,22 +50,6 @@ export class OnScreenKeyboard {
 
             videoElementParent.appendChild(this.hiddenInput);
         }
-
-        if (!this.editTextButton) {
-            this.editTextButton = document.createElement('button');
-            this.editTextButton.id = 'editTextButton';
-            this.editTextButton.innerHTML = 'edit text';
-            videoElementParent.appendChild(this.editTextButton);
-
-            // Hide the 'edit text' button.
-            this.editTextButton.style.display = 'none';
-
-            this.editTextButton.addEventListener('touchend', (event: Event) => {
-                // Show the on-screen keyboard.
-                this.hiddenInput.focus();
-                event.preventDefault();
-            });
-        }
     }
 
     /**
@@ -81,20 +57,14 @@ export class OnScreenKeyboard {
      * @param command the command received via the data channel containing keyboard positions
      */
     showOnScreenKeyboard(command: any) {
-        if (!this.editTextButton) {
+        if (!this.hiddenInput) {
             return;
         }
 
         if (command.showOnScreenKeyboard) {
-            // Show the 'edit text' button.
-            this.editTextButton.style.display = 'block';
-            // Place the 'edit text' button near the UE input widget.
-            const pos = this.unquantizeAndDenormalizeUnsigned(command.x, command.y);
-            this.editTextButton.style.top = pos.y.toString() + 'px';
-            this.editTextButton.style.left = (pos.x - 40).toString() + 'px';
+            // Show the on-screen keyboard.
+            this.hiddenInput.focus();
         } else {
-            // Hide the 'edit text' button.
-            this.editTextButton.style.display = 'none';
             // Hide the on-screen keyboard.
             this.hiddenInput.blur();
         }
