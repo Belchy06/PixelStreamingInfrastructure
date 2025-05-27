@@ -92,7 +92,7 @@ export class PixelStreamingApplicationStyle {
             left: '125%',
             zIndex: '20'
         },
-        '.UiTool:hover .tooltiptext': {
+        '.UiTool:hover:not(:has(div:hover)) .tooltiptext': {
             visibility: 'visible',
             backgroundColor: 'var(--color7)'
         },
@@ -187,14 +187,14 @@ export class PixelStreamingApplicationStyle {
             padding: '0.5rem',
             textAlign: 'center'
         },
-        '#uiFeatures button:hover': {
+        '#uiFeatures button:hover:not(:has(div:hover))': {
             backgroundColor: 'var(--color3)',
             border: '3px solid var(--color3)',
             transition: '0.25s ease',
             paddingLeft: '0.55rem',
             paddingTop: '0.55rem'
         },
-        '#uiFeatures button:active': {
+        '#uiFeatures button:active:not(:has(div:active)):': {
             border: '3px solid var(--color3)',
             backgroundColor: 'var(--color7)',
             paddingLeft: '0.55rem',
@@ -360,13 +360,13 @@ export class PixelStreamingApplicationStyle {
             boxSizing: 'border-box'
         },
         '.tgl::-moz-selection, .tgl:after::-moz-selection, .tgl:before::-moz-selection, .tgl *::-moz-selection, .tgl *:after::-moz-selection, .tgl *:before::-moz-selection, .tgl+.tgl-slider::-moz-selection':
-            {
-                background: 'none'
-            },
+        {
+            background: 'none'
+        },
         '.tgl::selection, .tgl:after::selection, .tgl:before::selection, .tgl *::selection, .tgl *:after::selection, .tgl *:before::selection, .tgl+.tgl-slider::selection':
-            {
-                background: 'none'
-            },
+        {
+            background: 'none'
+        },
         '.tgl-slider': {},
         '.tgl+.tgl-slider': {
             outline: '0',
@@ -545,6 +545,22 @@ export class PixelStreamingApplicationStyle {
         },
         '.modal .btn-flat': {
             fontSize: '1.0rem'
+        },
+        '.volumeControl': {
+            width: 'auto',
+            color: 'var(--color2)',
+            textAlign: 'center',
+            borderRadius: '15px',
+            padding: '0px 10px',
+            fontFamily: "'Montserrat', sans-serif",
+            fontSize: '0.75rem',
+            letterSpacing: '0.75px',
+            position: 'absolute',
+            top: '0',
+            transform: 'translateY(25%)',
+            left: '125%',
+            zIndex: '20',
+            backgroundColor: 'var(--color7)'
         }
     };
 

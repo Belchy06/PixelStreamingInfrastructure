@@ -3,6 +3,7 @@
 import { FullScreenIcon } from './FullscreenIcon';
 import { SettingsIcon } from './SettingsIcon';
 import { StatsIcon } from './StatsIcon';
+import { VolumeIcon } from './VolumeIcon';
 import { XRIcon } from './XRIcon';
 import { WebXRController } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.6';
 import { UIElementConfig, UIElementCreationMode } from '../UI/UIConfigurationTypes';
@@ -18,6 +19,7 @@ export type ControlsUIConfiguration = {
     fullscreenButtonType?: UIElementConfig;
     settingsButtonType?: UIElementConfig;
     xrIconType?: UIElementConfig;
+    volumeIconType?: UIElementConfig;
     hideControlsInFullscreen?: boolean;
 };
 
@@ -34,6 +36,7 @@ export class Controls {
     fullscreenIcon: FullScreenIcon;
     settingsIcon: SettingsIcon;
     xrIcon: XRIcon;
+    volumeIcon: VolumeIcon;
 
     _rootElement: HTMLElement;
 
@@ -55,6 +58,9 @@ export class Controls {
         }
         if (!config || shouldCreateButton(config.xrIconType)) {
             this.xrIcon = new XRIcon();
+        }
+        if (!config || shouldCreateButton(config.volumeIconType)) {
+            this.volumeIcon = new VolumeIcon();
         }
     }
 
@@ -82,6 +88,9 @@ export class Controls {
                 });
             }
             document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+            if (this.volumeIcon) {
+                this._rootElement.appendChild(this.volumeIcon.rootElement);
+            }
         }
 
         return this._rootElement;

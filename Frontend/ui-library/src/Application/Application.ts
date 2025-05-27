@@ -39,6 +39,7 @@ import {
     ExtraFlags
 } from '../UI/UIConfigurationTypes';
 import { FullScreenIconBase, FullScreenIconExternal } from '../UI/FullscreenIcon';
+import { VolumeIcon, VolumeIconBase, VolumeIconExternal } from '../UI/VolumeIcon';
 
 /**
  * Configuration of the internal video QP indicator element.
@@ -74,6 +75,8 @@ export interface UIOptions {
     videoQpIndicatorConfig?: VideoQPIndicatorConfig;
     /** Hide the controls in fullscreen mode */
     hideControlsInFullscreen?: boolean;
+    /** If needed, the volume icon can be external or disabled */
+    volumeControlsConfig?: UIElementConfig;
 }
 
 /**
@@ -221,7 +224,8 @@ export class Application {
                 : undefined,
             fullscreenButtonType: this._options.fullScreenControlsConfig,
             xrIconType: this._options.xrControlsConfig,
-            hideControlsInFullscreen: this._options.hideControlsInFullscreen
+            hideControlsInFullscreen: this._options.hideControlsInFullscreen,
+            volumeIconType: this._options.volumeControlsConfig
         };
 
         // Setup controls
@@ -232,11 +236,11 @@ export class Application {
         const fullScreenButton: FullScreenIconBase | undefined =
             // Depending on if we're creating an internal button, or using an external one
             !!this._options.fullScreenControlsConfig &&
-            this._options.fullScreenControlsConfig.creationMode === UIElementCreationMode.UseCustomElement
+                this._options.fullScreenControlsConfig.creationMode === UIElementCreationMode.UseCustomElement
                 ? // Either create a fullscreen class based on the external button
-                  new FullScreenIconExternal(this._options.fullScreenControlsConfig.customElement)
+                new FullScreenIconExternal(this._options.fullScreenControlsConfig.customElement)
                 : // Or use the one created by the Controls initializer earlier
-                  controls.fullscreenIcon;
+                controls.fullscreenIcon;
         if (fullScreenButton) {
             fullScreenButton.fullscreenElement = /iPad|iPhone|iPod/.test(navigator.userAgent)
                 ? this.stream.videoElementParent.getElementsByTagName('video')[0]
@@ -254,9 +258,19 @@ export class Application {
         const xrButton: HTMLElement | undefined = controls.xrIcon
             ? controls.xrIcon.rootElement
             : this._options.xrControlsConfig.creationMode === UIElementCreationMode.UseCustomElement
-              ? this._options.xrControlsConfig.customElement
-              : undefined;
+                ? this._options.xrControlsConfig.customElement
+                : undefined;
         if (xrButton) xrButton.onclick = () => this.stream.toggleXR();
+
+        const volumeControls: VolumeIconBase | undefined =
+            // Depending on if we're creating an internal button, or using an external one
+            !!this._options.volumeControlsConfig &&
+                this._options.volumeControlsConfig.creationMode === UIElementCreationMode.UseCustomElement
+                ? // Either create a fullscreen class based on the external button
+                new VolumeIconExternal(this._options.volumeControlsConfig.customElement)
+                : // Or use the one created by the Controls initializer earlier
+                controls.volumeIcon;
+        if (volumeControls) volumeControls.onVolumeChanged = (volume: number) => { this.stream.setPlayoutVolume(volume); }
 
         // setup the stats/info button
         const statsButton: HTMLElement | undefined = controls.statsIcon

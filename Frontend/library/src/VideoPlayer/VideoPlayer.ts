@@ -199,14 +199,14 @@ export class VideoPlayer {
         videoElementParent.setAttribute(
             'style',
             'top: ' +
-                styleTop +
-                'px; left: ' +
-                styleLeft +
-                'px; width: ' +
-                styleWidth +
-                '; height: ' +
-                styleHeight +
-                '; cursor: default;'
+            styleTop +
+            'px; left: ' +
+            styleLeft +
+            'px; width: ' +
+            styleWidth +
+            '; height: ' +
+            styleHeight +
+            '; cursor: default;'
         );
     }
 
@@ -232,6 +232,16 @@ export class VideoPlayer {
             Logger.Info('Resizing too often - skipping');
             clearTimeout(this.resizeTimeoutHandle);
             this.resizeTimeoutHandle = window.setTimeout(() => this.updateVideoStreamSize(), 100);
+        }
+    }
+
+    setPlayoutVolume(volume: number) {
+        const scaledVolume = volume / 100;
+        if (this.audioElement) {
+            this.audioElement.volume = scaledVolume;
+        }
+        if (this.videoElement) {
+            this.videoElement.volume = scaledVolume;
         }
     }
 }

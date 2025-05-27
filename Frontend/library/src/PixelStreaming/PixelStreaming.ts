@@ -931,4 +931,11 @@ export class PixelStreaming {
     public isReconnecting() {
         return this._webRtcController.isReconnecting;
     }
+
+    /** Public setter for the playout volume from the range 0 to 100 inclusive */
+    public setPlayoutVolume(volume: number) {
+        if (this._webRtcController.videoPlayer) {
+            this._webRtcController.videoPlayer.setPlayoutVolume(volume);
+        }
+    }
 }
