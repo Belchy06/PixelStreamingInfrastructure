@@ -7,6 +7,7 @@ call :ParseArgs %*
 
 IF "%CONTINUE%"=="1" (
 	call :Setup
+	call :BuildWilbur
 )
 
 goto :eof
@@ -17,5 +18,6 @@ goto :eof
 :SetPublicIP
 :SetupTurnStun
 :PrintConfig
+:BuildWilbur
 :StartWilbur
 %~dp0common.bat %*
